@@ -86,7 +86,6 @@ const HomeScreen = ({navigation}) => {
   const [selectedId, setSelectedId] = useState(null);
 
   const renderItem = ({ item }) => {
-    console.log(item.title)
     const backgroundColor = item.id === selectedId ? "red" : "transparent";
     const color = item.id === selectedId ? 'black' : 'black';
 
@@ -114,6 +113,8 @@ const HomeScreen = ({navigation}) => {
     'one',
   ]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [filterUsers, setFilterUsers] = useState([]); 
+
   const [datGet, setDataGet] = useState(0);
   const user2 = {paylod: 'vishnu'};
 
@@ -135,10 +136,25 @@ const HomeScreen = ({navigation}) => {
 
 
   const funCall = () => {
-
+    
     setData(data);
 
-    navigation.navigate(NavigationString.FILTER, {name: data});
+
+    const  journalEvents = (journal)=>{
+      let events = [];
+      for (let entry of journal) {
+        for (let event of entry.data) {
+          if (!events.includes(event)) {
+            events.push(event);
+          }
+        }
+      }
+      return events;
+    }
+    var result = journalEvents(users)
+    setFilterUsers(result)
+
+    navigation.navigate(NavigationString.FILTER, {name: filterUsers});
   };
 
 
@@ -173,7 +189,6 @@ const sortArrayZtoA = ()=>{
   setUsers(t1)
   setModalVisible(!modalVisible)
 }
-console.log('sorting' , users)
   return (
     <View>
       <View

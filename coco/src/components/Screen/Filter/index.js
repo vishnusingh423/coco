@@ -3,10 +3,11 @@ import {
   Text,
   View,
   SafeAreaView,
+  FlatList,
   SectionList,
   StatusBar,
   TextInput,
-  Button,
+  Button, TouchableOpacity
 } from 'react-native';
 import React, {useState,useEffect} from 'react';
 import {Sort} from '..';
@@ -21,9 +22,38 @@ import firestore from '@react-native-firebase/firestore';
 //     <Text style={styles.title}>{title}</Text>
 //   </View>
 // );
+const Item = ({ item, onPress, backgroundColor, textColor }) => (
+  <TouchableOpacity onPress={onPress} style={[styles.item, backgroundColor]}>
+     <BouncyCheckbox
+              style={styles.item}
+              size={30}
+              fillColor="blue"
+              unfillColor="#FFFFFF"
+              text={item}
+              iconStyle={{borderColor: 'blue'}}
+            />
+
+  </TouchableOpacity>
+);
 const Filter = ({navigation, route}) => {
+  const [selectedId, setSelectedId] = useState(null);
+  const [filterUsers, setFilterUsers] = useState([]); 
+  const mn =  route.params;
+
+  console.log('ffff' , mn)
   const [users, setUsers] = useState([]); 
-  
+  const renderItem = ({ item }) => {
+    const backgroundColor = item.id === selectedId ? "red" : "transparent";
+    const color = item.id === selectedId ? 'black' : 'black';
+
+    return (
+      <Item
+        item={item}
+        backgroundColor={{ backgroundColor }}
+        textColor={{ color }}
+      />
+    );
+  };
   useEffect(() => {
     const unsubscribe = firestore()
         .collection("cocoData")
@@ -33,10 +63,9 @@ const Filter = ({navigation, route}) => {
             ...doc.data(),
           }));
       setUsers(data[0].userCocoData);
-
+      
         });
     }, []);
-    console.log('the main data ', users);
 
   const {items} = useSelector(state => state.userReducer)
 
@@ -45,30 +74,37 @@ const Filter = ({navigation, route}) => {
         
     navigation.navigate(NavigationString.HOME);
     }
+
+    const  journalEvents = (journal)=>{
+      let events = [];
+      for (let entry of journal) {
+        for (let event of entry.data) {
+          if (!events.includes(event)) {
+            events.push(event);
+          }
+        }
+      }
+      return events;
+    }
+    // var result = journalEvents(users)
+    // setFilterUsers(result)
+    
+    console.log('the main data ', filterUsers);
+
   return (
     <>
-      <SectionList
-        sections={users}
-        keyExtractor={(item, index) => item + index}
-        renderItem={({item}) => (
-          <>
-            {/* <Item title={item} /> */}
-
-            <BouncyCheckbox
-              style={styles.item}
-              size={30}
-              fillColor="blue"
-              unfillColor="#FFFFFF"
-              text={item}
-              iconStyle={{borderColor: 'blue'}}
-            />
-          </>
-        )}
+  <SafeAreaView style={styles.container}>
+      <FlatList
+        data={mn.name}
+        renderItem={renderItem}
+       
       />
+    </SafeAreaView>
+      
       <View
         style={{
           flexDirection: 'row',
-          marginBottom: 33,
+          marginBottom: 0,
           justifyContent: 'space-evenly',
         }}>
         <View style={{borderWidth: 3, borderRadius: 33, width: 122}}>
@@ -82,7 +118,9 @@ const Filter = ({navigation, route}) => {
   );
 };
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+    marginTop: StatusBar.currentHeight || 0,
+  },
   item: {
     padding: 10,
     marginVertical: 0,
