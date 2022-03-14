@@ -11,17 +11,16 @@ import {
 import React, {useState,useEffect} from 'react';
 import {Sort} from '..';
 import NavigationString from '../../NavigatorScreen/NavigationString';
-import store from '../../../redux/index';
 import { useSelector } from 'react-redux';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import userReducer from '../../../redux/reducer';
 import firestore from '@react-native-firebase/firestore';
 
-const Item = ({title}) => (
-  <View style={styles.item}>
-    <Text style={styles.title}>{title}</Text>
-  </View>
-);
+// const Item = ({title}) => (
+//   <View style={styles.item}>
+//     <Text style={styles.title}>{title}</Text>
+//   </View>
+// );
 const Filter = ({navigation, route}) => {
   const [users, setUsers] = useState([]); 
   
