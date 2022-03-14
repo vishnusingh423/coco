@@ -153,7 +153,27 @@ const HomeScreen = ({navigation}) => {
       </View>
     );
   };
-
+Array.prototype.sortByAtoZ = function(p) {
+    return this.slice(0).sort(function(a,b) {
+      return (a[p] > b[p]) ? 1 : (a[p] < b[p]) ? -1 : 0;
+    });
+  } 
+  Array.prototype.sortByZtoA = function(p) {
+    return this.slice(0).sort(function(a,b) {
+      return (a[p] < b[p]) ? 1 : (a[p] > b[p]) ? -1 : 0;
+    });
+  } 
+const sortArrayAtoZ = ()=>{
+    var t =  users.sortByAtoZ('title')
+    setUsers(t)
+    setModalVisible(!modalVisible)
+}
+const sortArrayZtoA = ()=>{
+  var t1 =  users.sortByZtoA('title')
+  setUsers(t1)
+  setModalVisible(!modalVisible)
+}
+console.log('sorting' , users)
   return (
     <View>
       <View
@@ -194,9 +214,11 @@ const HomeScreen = ({navigation}) => {
                     unfillColor="#FFFFFF"
                     onPress={() => setModalVisible(!modalVisible)}
                     iconStyle={{borderColor: 'blue'}}
+                    onPress={sortArrayAtoZ}
                   />
                 </View>
                 <View>
+                  
                   <BouncyCheckbox
                     size={25}
                     fillColor="blue"
@@ -204,6 +226,8 @@ const HomeScreen = ({navigation}) => {
                     text="Sort -- Z to A"
                     onPress={() => setModalVisible(!modalVisible)}
                     iconStyle={{borderColor: 'blue'}}
+                    onPress={sortArrayZtoA}
+
                   />
                 </View>
               </View>
