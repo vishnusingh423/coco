@@ -10,14 +10,29 @@ import {
   DrawerLayoutAndroid,
 } from 'react-native';
 
-import {Provider} from 'react-redux';
-import {store} from './src/redux/store';
+
+
+// import {Provider} from 'react-redux';
+// import {store} from './src/redux/store';
+
+import { createStore,applyMiddleware,compose,combineReducers } from 'redux';
+import thunk from 'redux-thunk';
+import { Provider } from 'react-redux';
+import Home1 from './src/TestingPad/Compo/Home1';
+import FetchReducer from './src/TestingPad/Redux/Reducer/FetchReducer'
+import SetAtoZreducer from './src/redux/SetAtoZreducer';
+const materReduer= combineReducers({
+    fetchData:FetchReducer,
+    dataAtoZ:SetAtoZreducer
+})
+
+const store = createStore(materReduer,{fetchData:[] ,dataAtoZ:[]}, applyMiddleware(thunk));
 
 const App = () => {
 
   return (
     <Provider store={store}>
-      <NavigatorScreen />
+     <NavigatorScreen/>
     </Provider>
   );
 };

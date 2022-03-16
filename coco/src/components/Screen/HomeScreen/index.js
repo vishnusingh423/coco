@@ -8,7 +8,9 @@ import {
   Modal,
   Pressable,
   ActivityIndicator,
-   SafeAreaView, StatusBar, TouchableOpacity
+  SafeAreaView,
+  StatusBar,
+  TouchableOpacity,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {Filter, Sort} from '..';
@@ -16,8 +18,12 @@ import NavigationString from '../../NavigatorScreen/NavigationString';
 import store from '../../../redux/index';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import {useSelector, useDispatch} from 'react-redux';
-import {setUserData} from '../../../redux/action';
-import {watchPersonData} from '../../../redux/reducer';
+import {
+  fetchDataToChange,
+  setUserData,
+  SetAtoZreducer,
+} from '../../../redux/action';
+import {watchPersonData, FetchReducer} from '../../../redux/reducer';
 import firestore from '@react-native-firebase/firestore';
 
 const TAB_BAR_HEIGHT = 9;
@@ -32,17 +38,16 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    
   },
   centeredView: {
     marginTop: 622,
   },
   modalView: {
-      paddingLeft:44,
+    paddingLeft: 44,
     backgroundColor: 'white',
-    flexDirection:'column',
-    paddingBottom:22,
-    justifyContent:'space-evenly',
+    flexDirection: 'column',
+    paddingBottom: 22,
+    justifyContent: 'space-evenly',
     borderRadius: 0,
     shadowColor: '#000',
     width: 443,
@@ -72,91 +77,74 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   modalText: {
-      fontSize:13
+    fontSize: 13,
   },
 });
-const Item = ({ item, onPress, backgroundColor, textColor }) => (
+const mySet1 = new Set();
+
+const Item = ({item, onPress, backgroundColor, textColor}) => (
   <TouchableOpacity onPress={onPress} style={[styles.item, backgroundColor]}>
     <Text style={[styles.title, textColor]}>{item.title}</Text>
   </TouchableOpacity>
 );
 
 const HomeScreen = ({navigation}) => {
-
   const [selectedId, setSelectedId] = useState(null);
+  const users = useSelector(state => {
+    return state.fetchData;
+  });
+  Array.prototype.containsW = function (needle) {
+    var thisArray = [];
+    thisArray.push(needle);
+    for (var i in thisArray) {
+      if (thisArray[i] == needle) return true;
+    }
+    return false;
+  };
 
-  const renderItem = ({ item }) => {
-    const backgroundColor = item.id === selectedId ? "red" : "transparent";
+  const renderItem = ({item}) => {
+    const backgroundColor = item.id === selectedId ? 'red' : 'transparent';
     const color = item.id === selectedId ? 'black' : 'black';
 
     return (
       <Item
         item={item}
-        backgroundColor={{ backgroundColor }}
-        textColor={{ color }}
+        backgroundColor={{backgroundColor}}
+        textColor={{color}}
       />
     );
   };
-
-
-  const {name} = useSelector(state => state.userReducer);
+  useEffect(() => {
+    dispatch(fetchDataToChange());
+  }, []);
   const dispatch = useDispatch();
-  const [data, setData] = useState([
-    'one',
-    'six',
-    'two',
-    'three',
-    'four',
-    'Five',
-    'Six',
-    'One',
-    'one',
-  ]);
+
   const [modalVisible, setModalVisible] = useState(false);
-  const [filterUsers, setFilterUsers] = useState([]); 
+  const [filterUsers, setFilterUsers] = useState([]);
 
   const [datGet, setDataGet] = useState(0);
   const user2 = {paylod: 'vishnu'};
 
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState([]);
-
-  useEffect(() => {
-    const unsubscribe = firestore()
-      .collection('cocoData')
-      .onSnapshot(snapshot => {
-        const data = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setUsers(data[0].userCocoData);
-        dispatch(setUserData(data[0].userCocoData));
-      });
-  }, []);
-
-
-  const funCall = () => {
-    
-    setData(data);
-
-
-    const  journalEvents = (journal)=>{
-      let events = [];
-      for (let entry of journal) {
-        for (let event of entry.data) {
-          if (!events.includes(event)) {
-            events.push(event);
-          }
+  const journalEvents = journal => {
+    let events = [];
+    for (let entry of journal) {
+      for (let event of entry.data) {
+        if (!events.includes(event)) {
+          events.push(event);
         }
       }
-      return events;
+      ``;
     }
-    var result = journalEvents(users)
-    setFilterUsers(result)
+    return events;
+  };
+
+  const funCall = () => {
+    setFilterUsers(journalEvents(users));
+    dispatch(fetchDataToChange());
 
     navigation.navigate(NavigationString.FILTER, {name: filterUsers});
   };
-
 
   const bottomDrawer = () => {
     navigation.navigate(NavigationString.FILTER, {name: data});
@@ -169,26 +157,27 @@ const HomeScreen = ({navigation}) => {
       </View>
     );
   };
-Array.prototype.sortByAtoZ = function(p) {
-    return this.slice(0).sort(function(a,b) {
-      return (a[p] > b[p]) ? 1 : (a[p] < b[p]) ? -1 : 0;
+  Array.prototype.sortByAtoZ = function (p) {
+    return this.slice(0).sort(function (a, b) {
+      return a[p] > b[p] ? 1 : a[p] < b[p] ? -1 : 0;
     });
-  } 
-  Array.prototype.sortByZtoA = function(p) {
-    return this.slice(0).sort(function(a,b) {
-      return (a[p] < b[p]) ? 1 : (a[p] > b[p]) ? -1 : 0;
+  };
+  Array.prototype.sortByZtoA = function (p) {
+    return this.slice(0).sort(function (a, b) {
+      return a[p] < b[p] ? 1 : a[p] > b[p] ? -1 : 0;
     });
-  } 
-const sortArrayAtoZ = ()=>{
-    var t =  users.sortByAtoZ('title')
-    setUsers(t)
-    setModalVisible(!modalVisible)
-}
-const sortArrayZtoA = ()=>{
-  var t1 =  users.sortByZtoA('title')
-  setUsers(t1)
-  setModalVisible(!modalVisible)
-}
+  };
+  const sortArrayAtoZ = () => {
+    var t = users.sortByAtoZ('title');
+    dispatch(fetchDataToChange(t, 'HOME'));
+    setModalVisible(!modalVisible);
+  };
+  const sortArrayZtoA = () => {
+    var t1 = users.sortByZtoA('title');
+    dispatch(fetchDataToChange(t1, 'HOME'));
+
+    setModalVisible(!modalVisible);
+  };
   return (
     <View>
       <View
@@ -233,7 +222,6 @@ const sortArrayZtoA = ()=>{
                   />
                 </View>
                 <View>
-                  
                   <BouncyCheckbox
                     size={25}
                     fillColor="blue"
@@ -242,7 +230,6 @@ const sortArrayZtoA = ()=>{
                     onPress={() => setModalVisible(!modalVisible)}
                     iconStyle={{borderColor: 'blue'}}
                     onPress={sortArrayZtoA}
-
                   />
                 </View>
               </View>
@@ -270,13 +257,8 @@ const sortArrayZtoA = ()=>{
       </View>
 
       <SafeAreaView style={styles.container}>
-      <FlatList
-        data={users.map((e,i) => e)}
-        renderItem={renderItem}
-       
-      />
-    </SafeAreaView>
-
+        <FlatList data={users.map((e, i) => e)} renderItem={renderItem} />
+      </SafeAreaView>
     </View>
   );
 };
